@@ -1,4 +1,9 @@
 # Digby Take Home Task
+
+Host agent vs Guessing agent
+
+Host agent creates a topic, guessing agent has 20 questions to guess the topic.
+
 ## Set Up
 
   
@@ -20,7 +25,8 @@
   
   
 
-
+## Example output
+![telegram-cloud-photo-size-4-5819117745172758730-y](https://github.com/user-attachments/assets/2d4da379-7529-469a-94fc-77f376ee59e0)
 
   
 

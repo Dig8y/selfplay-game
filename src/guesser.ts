@@ -16,7 +16,6 @@ export default class Guesser {
   }
 
   async askQuestion(previousMessages: Message[]) {
-    console.log(constructGuessingPrompt(previousMessages));
 
     const askQuestionResponse = await this.createChatCompletion(
       constructGuessingPrompt(previousMessages)

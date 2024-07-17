@@ -30,7 +30,7 @@ export default class Host {
   public async defineTopic(this: Host) {
     const defineTopicResponse = await this.createChatCompletion(
       [hostDefineTopicPrompt],
-      0.7
+      0.9
     );
 
     if (!defineTopicResponse) {
@@ -46,7 +46,6 @@ export default class Host {
       parsedDefineTopicResponse
     );
 
-    
     this.topic = topic;
     return topic;
   }

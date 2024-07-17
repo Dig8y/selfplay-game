@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import {
   constructHostAnswerPrompt,
+  constructHostMessageHistory,
   hostDefineTopicPrompt,
   hostSystemPrompt,
 } from "./prompts/hostPrompts";
@@ -8,7 +9,11 @@ import {
 export interface Message {
   role: "system" | "user";
   content: string;
+  isYes?: boolean;
+  isCorrectTopic?: boolean;
 }
+
+const openAiResponseErrorMsg = "Failed to get response from openAI";
 
 export default class Host {
   public topic: string;
@@ -19,19 +24,21 @@ export default class Host {
       apiKey: openaiKey,
     });
     this.topic = "";
-    this.messageHistory = [hostSystemPrompt];
+    this.messageHistory = [];
   }
 
   public async defineTopic(this: Host) {
-    const res = await this.createChatCompletion([
-      ...this.messageHistory,
-      hostDefineTopicPrompt,
-    ]);
+    const defineTopicResponse = await this.createChatCompletion(
+      [hostDefineTopicPrompt],
+      0.7
+    );
 
-    if (!res) {
-      throw new Error("Failed to get ressponse");
+    if (!defineTopicResponse) {
+      throw new Error(openAiResponseErrorMsg);
     }
-    const { topic } = JSON.parse(res.choices[0].message.content as string) as {
+    const { topic } = JSON.parse(
+      defineTopicResponse.choices[0].message.content as string
+    ) as {
       topic: string;
     };
     this.topic = topic;
@@ -39,18 +46,34 @@ export default class Host {
   }
 
   public async answerQuestion(this: Host, question: string) {
-    const res = await this.createChatCompletion([
-      ...this.messageHistory,
-      constructHostAnswerPrompt(question),
-    ]);
-    return res.choices[0].message.content;
+    const hostAnswerResponse = await this.createChatCompletion(
+      [constructHostAnswerPrompt(this.topic, question)],
+      0
+    );
+
+    if (!hostAnswerResponse) {
+      throw new Error(openAiResponseErrorMsg);
+    }
+
+    const { isYes, isCorrectTopic } = JSON.parse(
+      hostAnswerResponse.choices[0].message.content as string
+    ) as {
+      isYes: boolean;
+      isCorrectTopic: boolean;
+    };
+
+    this.messageHistory.push({
+      ...constructHostMessageHistory(question, isYes, isCorrectTopic),
+      isYes,
+      isCorrectTopic,
+    });
   }
 
-  async createChatCompletion(messages: Message[]) {
+  async createChatCompletion(messages: Message[], temperature: number) {
     return this.client.chat.completions.create({
-      model: "gpt-3.5-turbo",
-      messages: messages,
-      temperature: 0,
+      model: "gpt-4o",
+      messages: [hostSystemPrompt, ...messages],
+      temperature,
       response_format: {
         type: "json_object",
       },

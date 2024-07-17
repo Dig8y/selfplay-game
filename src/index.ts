@@ -1,19 +1,47 @@
-import Host from "./host";
+import Host, { Message } from "./host";
+import Guesser from "./guesser";
+
+const openAIKey = "sk-proj-oZjuKIMulbnIPlsg0ZMiT3BlbkFJEuBCoNqUwWKohyP5GuWe";
+
+export type Conversation = {
+  speaker: "guesser" | "host";
+  content: string;
+  isYes?: boolean;
+}[];
 
 const startGame = async () => {
   console.log("Game started");
 
-  const host = new Host(
-    "sk-proj-oZjuKIMulbnIPlsg0ZMiT3BlbkFJEuBCoNqUwWKohyP5GuWe"
-  );
+  const host = new Host(openAIKey);
 
-  console.log("🚀 ~ startGame ~ host:", host);
+  const guesser = new Guesser(openAIKey);
+
+  console.log("The host is defining the topic");
+
   const topic = await host.defineTopic();
 
-  
-  console.log("🚀 ~ startGame ~ topic:", topic);
+  const messageHistory: Message[] = host.messageHistory;
 
-  console.log("Game ended");
+  console.log(
+    "The Game has started, the topic will be revealed at the end of the game."
+  );
+
+  for (let i = 0; i < 21; i++) {
+    const question = await guesser.askQuestion(messageHistory);
+
+    await host.answerQuestion(question);
+
+    console.log("Conversation History", messageHistory);
+
+    if (host.messageHistory[host.messageHistory.length - 1].isCorrectTopic) {
+      console.log("The guesser has guessed the topic correctly, it was", topic);
+      break;
+    }
+  }
+
+  console.log("The guesser has failed to guess the topic, it was", topic);
+
+  console.log("Game Over");
 };
 
 startGame();

@@ -8,12 +8,47 @@ export const hostSystemPrompt: Message = {
 
 export const hostDefineTopicPrompt: Message = {
   role: "user",
-  content: `I will now ask you to generate a topic for me, returning it to me in json format. With type { topic: string }, Here are some topic examples: 'apple','banana', 'car', 'house', 'dog', 'cat', 'bird', 'tree' 'flower' 'computer' Begin `,
+  content: `I will now ask you to generate a topic for me, returning it to me in json format. With type { topic: string }, Here are some topic examples: 'apple','banana', 'car', 'house', 'dog', 'Eiffel Tower', 'Great Wall of China', 'bird', 'The Lion King', 'Microwave', 'Vacuum Cleaner', 'Titanic', 'flower', 'mountain lion', 'formula 1' Begin `,
 };
 
-export const constructHostAnswerPrompt = (question: string): Message => {
+export const constructHostAnswerPrompt = (
+  topic: string,
+  question: string
+): Message => {
   return {
     role: "user",
-    content: `${question}`,
+    content: `
+      You provided me with a topic of ${topic}. Now I will ask you a question about your topic.
+      
+      
+      You will return the answer to me in json format. With type { isYes: boolean, isCorrectTopic: boolean }.
+      
+      isYes is defined as the guesser's guess of the topic.
+      
+      Think carefully about your answer. Here is the question:
+      
+      
+      ${question}
+
+      Begin
+    
+    `,
+  };
+};
+
+export const constructHostMessageHistory = (
+  question: string,
+  isYes: boolean,
+  isCorrectTopic: boolean
+): Message => {
+  return {
+    role: "user",
+    content: `
+      The guesser asked the question: ${question}
+      The hosts response was ${isYes ? "Yes" : "No"}
+      Was the guesser correct?: ${
+        isCorrectTopic ? "Correct Guess" : "Incorrect Guess"
+      }
+    `,
   };
 };

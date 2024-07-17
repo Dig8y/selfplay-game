@@ -1,4 +1,9 @@
 # Digby Take Home Task
+
+Host agent vs Guessing agent
+
+Host agent creates a topic, guessing agent has 20 questions to guess the topic.
+
 ## Set Up
 
   

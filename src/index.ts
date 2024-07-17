@@ -3,11 +3,6 @@ import Guesser from "./guesser";
 
 const openAIKey = "API_KEY_HERE";
 
-export type Conversation = {
-  speaker: "guesser" | "host";
-  content: string;
-  isYes?: boolean;
-}[];
 
 const startGame = async () => {
   console.log("Game started");

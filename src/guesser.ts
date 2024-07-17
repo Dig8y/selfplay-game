@@ -4,6 +4,7 @@ import {
   constructGuessingPrompt,
   guesserSystemPrompt,
 } from "./prompts/guesserPrompts";
+import { z } from "zod";
 
 export default class Guesser {
   public client: OpenAI;
@@ -17,19 +18,21 @@ export default class Guesser {
   async askQuestion(previousMessages: Message[]) {
     console.log(constructGuessingPrompt(previousMessages));
 
-    const res = await this.createChatCompletion(
+    const askQuestionResponse = await this.createChatCompletion(
       constructGuessingPrompt(previousMessages)
     );
 
-    if (!res) {
+    if (!askQuestionResponse) {
       throw new Error("Failed to get response from openAI");
     }
 
-    const { question } = JSON.parse(
-      res.choices[0].message.content as string
+    const parsedAskQuestionRes = JSON.parse(
+      askQuestionResponse.choices[0].message.content as string
     ) as {
       question: string;
     };
+
+    const { question } = askQuestionResponseSchema.parse(parsedAskQuestionRes);
 
     return question;
   }
@@ -45,3 +48,7 @@ export default class Guesser {
     });
   }
 }
+
+const askQuestionResponseSchema = z.object({
+  question: z.string(),
+});

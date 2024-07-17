@@ -5,7 +5,7 @@ import {
   hostDefineTopicPrompt,
   hostSystemPrompt,
 } from "./prompts/hostPrompts";
-
+import { z } from "zod";
 export interface Message {
   role: "system" | "user";
   content: string;
@@ -36,11 +36,17 @@ export default class Host {
     if (!defineTopicResponse) {
       throw new Error(openAiResponseErrorMsg);
     }
-    const { topic } = JSON.parse(
+    const parsedDefineTopicResponse = JSON.parse(
       defineTopicResponse.choices[0].message.content as string
     ) as {
       topic: string;
     };
+
+    const { topic } = defineTopicResponseSchema.parse(
+      parsedDefineTopicResponse
+    );
+
+    
     this.topic = topic;
     return topic;
   }
@@ -55,12 +61,14 @@ export default class Host {
       throw new Error(openAiResponseErrorMsg);
     }
 
-    const { isYes, isCorrectTopic } = JSON.parse(
+    const parsedHostAnswer = JSON.parse(
       hostAnswerResponse.choices[0].message.content as string
     ) as {
       isYes: boolean;
       isCorrectTopic: boolean;
     };
+    const { isYes, isCorrectTopic } =
+      hostAnswerResponseSchema.parse(parsedHostAnswer);
 
     this.messageHistory.push({
       ...constructHostMessageHistory(question, isYes, isCorrectTopic),
@@ -80,3 +88,12 @@ export default class Host {
     });
   }
 }
+
+const hostAnswerResponseSchema = z.object({
+  isYes: z.boolean(),
+  isCorrectTopic: z.boolean(),
+});
+
+const defineTopicResponseSchema = z.object({
+  topic: z.string(),
+});

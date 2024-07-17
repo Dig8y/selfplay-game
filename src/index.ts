@@ -1,7 +1,7 @@
 import Host, { Message } from "./host";
 import Guesser from "./guesser";
 
-const openAIKey = "sk-proj-oZjuKIMulbnIPlsg0ZMiT3BlbkFJEuBCoNqUwWKohyP5GuWe";
+const openAIKey = "API_KEY_HERE";
 
 export type Conversation = {
   speaker: "guesser" | "host";
@@ -39,7 +39,11 @@ const startGame = async () => {
     }
   }
 
-  console.log("The guesser has failed to guess the topic, it was", topic);
+  if (
+    host.messageHistory[host.messageHistory.length - 1].isCorrectTopic === false
+  ) {
+    console.log("The guesser has failed to guess the topic, it was", topic);
+  }
 
   console.log("Game Over");
 };

@@ -12,6 +12,8 @@ Host agent creates a topic, guessing agent has 20 questions to guess the topic.
   
     npm install -g ts-node
 
+    npm i
+
 ### env keys
 
     openAIKey="..."
